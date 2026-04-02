@@ -1,0 +1,225 @@
+
+System Overview:
+
+The system will handle the complete tournament management process, from registration and grouping to match details, room ID and passcode management, result publishing, and real-time updates for players and admins. Let’s go through the core steps and features in more detail.
+
+
+
+Step-by-Step System Flow
+
+1. Tournament Registration
+
+Admin Action: Admin will create a Google Form for team leaders to fill out with the following information:
+
+Team leader’s UID.
+
+Team leader’s email.
+
+Team name.
+
+Player details (player names, UID).
+
+
+Data Sync: After registration, the form data will be saved in a Google Sheet. Using Google Sheets API, the system will sync this data into the main database (Firestore or MongoDB). The system will regularly update to ensure all registered teams are properly imported.
+
+
+2. Grouping Process
+
+Admin Action: In the admin panel, the admin will randomly assign teams to groups. Each group will have a predefined number of teams (e.g., 12 teams per group). Admins will click a button to automatically group the teams based on the data in the system.
+
+Backend Process:
+
+Admin clicks the "group teams" button, and the system will assign teams to different groups randomly using an algorithm.
+
+Once the grouping is done, the system will save the group assignments in the database.
+
+
+How It Works:
+
+Teams will be divided into groups, and group details will be saved to the database.
+
+The team leader’s UID and email will be used to associate the team with the appropriate group.
+
+
+
+3. User Login
+
+Frontend Process:
+
+The team leader will log in by entering their UID and email on the login page. The system will verify if the UID and email match with an entry in the database.
+
+The system will check:
+
+Is this UID in the database?
+
+Does this email match the UID?
+
+Which group is this team in?
+
+
+
+Database Verification:
+
+The backend checks the database to see if the UID and email exist.
+
+If they exist, the system fetches the corresponding group information and assigns the leader to the correct group’s page.
+
+
+How It Works:
+
+After login, the team leader is redirected to the dashboard showing the details of their team’s group.
+
+Real-time updates will be enabled so that when admins provide a room ID and passcode, the system will instantly update the team’s dashboard without requiring a page refresh.
+
+
+
+4. Group Dashboard
+
+Frontend Process:
+
+The team leader’s dashboard will show:
+
+The group they belong to.
+
+A list of teams in their group (with player names and IDs, fetched from the synced data).
+
+Match schedule (dates, times, and maps).
+
+The room ID and passcode will be displayed 10 minutes before each match (updated live in real time).
+
+
+
+How It Works:
+
+The dashboard will also show qualifying teams based on the ongoing round and match results.
+
+If the team qualifies for the next round, it will show a "Congratulations" message, and a button to view the next round’s details.
+
+
+
+5. Real-Time Updates for Room ID and Passcode
+
+Admin Action: Admins will generate the room ID and passcode for each match in the admin panel.
+
+Backend Process:
+
+The system will live sync the room ID and passcode to the team leader's dashboard and email them to all team leaders in that group.
+
+
+How It Works:
+
+Whenever an admin provides a room ID and passcode in the admin panel, it will automatically appear in the team’s dashboard without needing a page refresh.
+
+This happens in real-time by using WebSockets for real-time communication between the backend and frontend.
+
+
+
+6. Points System & Result Submission
+
+Backend Process:
+
+After each round, admins will submit match results, and the system will automatically calculate points according to the official Free Fire point system.
+
+The system will then update the leaderboard.
+
+
+Admin Action: Admins can publish the results with one click.
+
+How It Works:
+
+The results are saved in the database, and the system calculates the points based on the match scores.
+
+Once the results are published, the team leaderboard is updated automatically, showing teams that qualified for the next round.
+
+
+
+7. Round Qualification
+
+How It Works:
+
+Based on the results of each match, the system will calculate the top qualifying teams for the next round.
+
+Teams that qualify will see a “Congratulations, you have qualified” message on their dashboard, while non-qualifying teams will receive a “Sorry, you did not qualify” message.
+
+Non-qualified teams will be able to log in again, but they will see their previous round’s status, and their dashboard won’t show the next round’s details.
+
+
+
+8. Tournament Completion and Cleanup
+
+Admin Action: Once the tournament ends, the admin will delete the relevant tournament collection from the database to free up space for future tournaments.
+
+Backend Process:
+
+The system will drop or delete the tournament collection from the database.
+
+This ensures that only active tournaments have data stored and no unnecessary data occupies space.
+
+
+
+
+Tech Stack
+
+1. Frontend:
+
+Next.js: Both frontend and backend (API routes) will be handled by Next.js. It’s a powerful framework for React with server-side rendering, so it works great for dynamic content like tournament management.
+
+Tailwind CSS: For creating fast, responsive, and beautiful user interfaces.
+
+WebSockets (or Socket.io): For real-time updates, ensuring that match details, room IDs, and passcodes are instantly shown without page refresh.
+
+React: Used within the Next.js framework for building interactive user interfaces.
+
+
+
+2. Backend:
+
+Next.js API Routes: Handle all backend operations such as login, fetching team data, updating match results, and generating notifications.
+
+Node.js: Runs the server-side logic behind Next.js.
+
+
+
+3. Database:
+
+MongoDB: A NoSQL database is ideal for storing tournament data in collections, teams, results, etc. Each tournament will have its own collection.
+
+Firebase Firestore (Alternative): If you prefer a more scalable real-time database with automatic sync and notifications, Firebase Firestore is a great choice.
+
+
+
+4. Authentication:
+
+No traditional authentication. Instead, UID and email-based login verification is used to check whether the user exists in the database and if they belong to a particular group. Session cookies or JWT will be used to track login state.
+
+
+
+5. Email Notification System:
+
+SendGrid or SMTP for sending emails to team leaders with important tournament information like room IDs, passcodes, and qualification results.
+
+
+
+6. Real-time Features:
+
+WebSockets or Socket.io: For real-time updates to the team leaders' dashboards, ensuring instant updates without page reloads.
+
+
+
+
+How the System Works in Real-Time:
+
+1. Admin generates room IDs in the admin panel.
+
+
+2. Real-time sync happens through Socket.io. When room IDs are generated, they will immediately be shown in team leaders' dashboards without needing a page refresh.
+
+
+3. When a match result is submitted, the leaderboard and qualifying teams update instantly on the dashboard.
+
+
+
+Final Thoughts:
+
+This system will provide a seamless experience for both admins and team leaders. It’s real-time, easy to scale, and provides all the necessary features for tournament management. The use of Next.js and MongoDB/Firebase makes it both flexible and scalable for multiple tournaments in the future.
+!
