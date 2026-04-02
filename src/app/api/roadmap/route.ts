@@ -98,3 +98,60 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+/**
+ * PATCH /api/roadmap
+ * Update individual round settings (name, qualifyPerGroup).
+ * Only rounds with status !== 'completed' can be edited.
+ * Body: { rounds: { id: string, qualifyPerGroup?: number, name?: string }[] }
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { rounds: updatedRounds } = body as { rounds: { id: string; qualifyPerGroup?: number; name?: string }[] };
+
+    if (!updatedRounds?.length) {
+      return NextResponse.json({ error: 'rounds array required' }, { status: 400 });
+    }
+
+    const db = getDb();
+    const snap = await db.collection('tournaments').doc(TOURNAMENT_ID).get();
+
+    if (!snap.exists) {
+      return NextResponse.json({ error: 'No tournament found' }, { status: 404 });
+    }
+
+    const data = snap.data()!;
+    const existingRounds: RoadmapRound[] = data.roadmap || [];
+
+    const blockedRounds: string[] = [];
+    const newRoadmap = existingRounds.map((existing) => {
+      const update = updatedRounds.find((u) => u.id === existing.id);
+      if (!update) return existing;
+
+      if (existing.status === 'completed') {
+        blockedRounds.push(existing.name);
+        return existing; // Don't change completed rounds
+      }
+
+      return {
+        ...existing,
+        ...(update.qualifyPerGroup !== undefined ? { qualifyPerGroup: update.qualifyPerGroup } : {}),
+        ...(update.name ? { name: update.name } : {}),
+      };
+    });
+
+    await db.collection('tournaments').doc(TOURNAMENT_ID).update({
+      roadmap: newRoadmap,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json({
+      success: true,
+      blockedRounds,
+      roadmap: newRoadmap,
+    });
+  } catch (error: any) {
+    console.error('PATCH roadmap error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

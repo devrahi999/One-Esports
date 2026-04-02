@@ -10,7 +10,8 @@ export async function createSession(payload: { uid: string; teamId: string }) {
     .setExpirationTime('12h')
     .sign(SECRET);
 
-  cookies().set('tournament_session', token, {
+  const cookieStore = await cookies();
+  cookieStore.set('tournament_session', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -23,7 +24,8 @@ export async function createSession(payload: { uid: string; teamId: string }) {
 
 export async function verifySession(): Promise<{ uid: string; teamId: string } | null> {
   try {
-    const token = cookies().get('tournament_session')?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('tournament_session')?.value;
     if (!token) return null;
     const { payload } = await jwtVerify(token, SECRET);
     return { uid: payload.uid as string, teamId: payload.teamId as string };
@@ -33,7 +35,8 @@ export async function verifySession(): Promise<{ uid: string; teamId: string } |
 }
 
 export async function clearSession() {
-  cookies().delete('tournament_session');
+  const cookieStore = await cookies();
+  cookieStore.delete('tournament_session');
 }
 
 export async function getSessionFromRequest(

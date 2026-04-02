@@ -11,10 +11,10 @@ import { sendRoomCredentials } from '@/lib/email';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const { matchId } = params;
+    const { matchId } = await params;
     const body = await request.json();
     const { roomID, passcode, sendEmail = false } = body as {
       roomID: string;
@@ -82,10 +82,10 @@ export async function PUT(
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const { matchId } = params;
+    const { matchId } = await params;
     const db = getDb();
     const matchDoc = await db.collection('matches').doc(matchId).get();
 
@@ -106,10 +106,10 @@ export async function GET(
  */
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const { matchId } = params;
+    const { matchId } = await params;
     const db = getDb();
     await db.collection('matches').doc(matchId).delete();
     return NextResponse.json({ success: true });

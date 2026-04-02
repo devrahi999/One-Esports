@@ -1,0 +1,25 @@
+
+> one-esports-tournament@0.2.0 build
+> next build
+
+   Γû▓ Next.js 15.5.14
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 4.4s
+   Linting and checking validity of types ...
+Failed to compile.
+
+.next/types/app/api/matches/[matchId]/results/route.ts:49:7
+Type error: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { matchId: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ matchId: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+
+  47 |     Diff<
+  48 |       ParamCheck<RouteContext>,
+> 49 |       {
+     |       ^
+  50 |         __tag__: 'GET'
+  51 |         __param_position__: 'second'
+  52 |         __param_type__: SecondArg<MaybeField<TEntry, 'GET'>>
+Next.js build worker exited with code: 1 and signal: null

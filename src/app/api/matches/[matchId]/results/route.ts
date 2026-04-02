@@ -16,10 +16,10 @@ interface ResultEntry {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const { matchId } = params;
+    const { matchId } = await params;
     const body = await request.json();
     const { results }: { results: ResultEntry[] } = body;
 
@@ -100,10 +100,10 @@ export async function POST(
  */
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
   try {
-    const { matchId } = params;
+    const { matchId } = await params;
     const db = getDb();
     const matchDoc = await db.collection('matches').doc(matchId).get();
 

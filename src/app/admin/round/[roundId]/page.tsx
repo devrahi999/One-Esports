@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { use } from 'react';
 import {
   ArrowLeft, Users, CheckCircle2, Clock, CircleDot, ChevronRight,
-  Trophy, ArrowRight, ShieldCheck, Zap, Loader2
+  Trophy, ArrowRight, ShieldCheck, Zap, Loader2, Archive
 } from 'lucide-react';
 
 interface Group {
@@ -45,6 +45,7 @@ export default function RoundPage({ params }: { params: Promise<{ roundId: strin
   const [canAdvance, setCanAdvance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
+  const [archiving, setArchiving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   function showMsg(text: string, type: 'success' | 'error' = 'success') {
@@ -83,6 +84,22 @@ export default function RoundPage({ params }: { params: Promise<{ roundId: strin
       showMsg('❌ ' + e.message, 'error');
     } finally {
       setAdvancing(false);
+    }
+  }
+
+  async function handleArchive() {
+    if (!confirm('⚠️ This will archive the tournament and WIPE all live data. Are you absolutely sure?')) return;
+    setArchiving(true);
+    try {
+      const res = await fetch('/api/tournament/archive', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      showMsg(`✅ Tournament archived! Champion: ${data.champion || 'N/A'}. Redirecting...`);
+      setTimeout(() => router.push('/admin'), 3000);
+    } catch (e: any) {
+      showMsg('❌ ' + e.message, 'error');
+    } finally {
+      setArchiving(false);
     }
   }
 
@@ -232,9 +249,11 @@ export default function RoundPage({ params }: { params: Promise<{ roundId: strin
                   <span className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" /> {group.teamIds.length} teams
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-[#ff6a00]/60" /> Top {group.qualifyCount} qualify
-                  </span>
+                  {!isLastRound && (
+                    <span className="flex items-center gap-1.5">
+                      <Trophy className="w-3.5 h-3.5 text-[#ff6a00]/60" /> Top {group.qualifyCount} qualify
+                    </span>
+                  )}
                 </div>
               </Link>
             ))}
@@ -267,10 +286,31 @@ export default function RoundPage({ params }: { params: Promise<{ roundId: strin
         )}
 
         {isLastRound && doneGroups === totalGroups && totalGroups > 0 && (
-          <div className="rounded-3xl p-8 bg-emerald-500/[0.06] border border-emerald-500/30 text-center">
-            <Trophy className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-            <h3 className="font-black text-white uppercase italic tracking-tighter text-2xl">Tournament Complete!</h3>
-            <p className="text-emerald-400 font-bold mt-2">All rounds finished. Final results are ready.</p>
+          <div className="rounded-3xl p-8 bg-emerald-500/[0.06] border border-emerald-500/30">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Trophy className="w-8 h-8 text-emerald-500" />
+                  <h3 className="font-black text-white uppercase italic tracking-tighter text-2xl">Tournament Complete!</h3>
+                </div>
+                <p className="text-emerald-400 font-bold text-sm">
+                  All {totalGroups} groups have finished. The final results are in.
+                </p>
+                <p className="text-gray-500 font-bold text-xs mt-2 max-w-md">
+                  Archiving will save a full snapshot of this tournament (all rounds, results, standings) and clear the admin panel for a new event.
+                </p>
+              </div>
+              <button
+                onClick={handleArchive}
+                disabled={archiving}
+                className="flex items-center gap-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-white font-black uppercase italic py-4 px-8 rounded-xl transition-all whitespace-nowrap shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+              >
+                {archiving
+                  ? <Loader2 className="w-5 h-5 animate-spin" />
+                  : <><Archive className="w-5 h-5" /> Archive &amp; Close Tournament</>
+                }
+              </button>
+            </div>
           </div>
         )}
       </div>

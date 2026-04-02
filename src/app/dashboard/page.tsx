@@ -261,52 +261,71 @@ export default function DashboardPage() {
           <div className="lg:col-span-8 space-y-6">
             
             {/* MATCH DETAILS AND ROOM CARD */}
+            {data.group && (
             <section>
               <div
                 className={`relative overflow-hidden rounded-2xl bg-white/[0.02] border border-white/5 p-6 md:p-8 transition-all duration-700 ${
                   newRoomFlash ? 'ring-1 ring-[#ff6a00] bg-[#ff6a00]/[0.03]' : ''
                 }`}
               >
-                <div className="flex justify-between items-start mb-8 border-b border-white/5 pb-6">
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">Match Details</h3>
-                    <div className="flex flex-wrap items-center gap-4 mt-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-[#ff6a00]/50" /> {data.group?.date ? new Date(data.group.date).toLocaleDateString('en-GB') : 'TBD'}</span>
-                      <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-[#ff6a00]/50" /> {data.group?.time || 'TBD'}</span>
-                      <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#ff6a00]/50" /> {data.group?.map || 'TBD'}</span>
-                      <span className="flex items-center gap-1.5"><Gamepad2 className="w-3.5 h-3.5 text-[#ff6a00]/50" /> {data.group?.matchCount || '?'} Matches</span>
-                      <span className="flex items-center gap-1.5"><Trophy className="w-3.5 h-3.5 text-[#ff6a00]/50" /> Top {data.group?.qualifyCount || 3} Qualify</span>
-                    </div>
-                  </div>
+                <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter mb-5">Match Details</h3>
+
+                {/* Plain bold text details */}
+                <div className="space-y-2 mb-6">
+                  <p className="text-gray-400 text-sm">
+                    <span className="text-white font-black">📅 Date:</span>{' '}
+                    <span className="text-white font-bold">
+                      {data.group?.date ? new Date(data.group.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'TBD'}
+                    </span>
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    <span className="text-white font-black">🕐 Time:</span>{' '}
+                    <span className="text-white font-bold">{data.group?.time || 'TBD'}</span>
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    <span className="text-white font-black">🗺️ Maps:</span>{' '}
+                    <span className="text-white font-bold">{data.group?.map || 'TBD'}</span>
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    <span className="text-white font-black">🎮 Total Matches:</span>{' '}
+                    <span className="text-white font-bold">{data.group?.matchCount ?? '?'}</span>
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    <span className="text-white font-black">🏆 Top Qualify:</span>{' '}
+                    <span className="text-white font-bold">Top {data.group?.qualifyCount ?? 3} teams advance</span>
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-4 group hover:border-[#ff6a00]/30 transition-colors flex items-center justify-between">
-                    <div>
-                      <p className="text-[9px] font-black text-[#ff6a00] uppercase tracking-[0.3em] mb-1 opacity-60">Room ID</p>
-                      <p className="text-xl font-black text-white font-mono tracking-widest">{liveRoomID || '---'}</p>
+                {/* Room Credentials */}
+                <div className="border-t border-white/5 pt-5">
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">Room Credentials</p>
+                  {liveRoomID && livePasscode ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-[9px] font-black text-[#ff6a00] uppercase tracking-[0.3em] mb-1 opacity-60">Room ID</p>
+                          <p className="text-xl font-black text-white font-mono tracking-widest">{liveRoomID}</p>
+                        </div>
+                        <button onClick={() => copyToClipboard(liveRoomID)} className="bg-black/30 hover:bg-black/50 px-3 py-2 rounded-lg text-gray-400 hover:text-white transition-colors text-xs font-black uppercase tracking-widest">Copy</button>
+                      </div>
+                      <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-[9px] font-black text-[#ff6a00] uppercase tracking-[0.3em] mb-1 opacity-60">Passcode</p>
+                          <p className="text-xl font-black text-white font-mono tracking-widest">{livePasscode}</p>
+                        </div>
+                        <button onClick={() => copyToClipboard(livePasscode)} className="bg-black/30 hover:bg-black/50 px-3 py-2 rounded-lg text-gray-400 hover:text-white transition-colors text-xs font-black uppercase tracking-widest">Copy</button>
+                      </div>
                     </div>
-                    {liveRoomID && (
-                      <button onClick={() => copyToClipboard(liveRoomID)} className="bg-black/30 hover:bg-black/50 p-2 rounded-lg text-gray-400 hover:text-white transition-colors">Copy</button>
-                    )}
-                  </div>
-                  <div className="bg-white/5 border border-white/5 rounded-xl p-4 group hover:border-[#ff6a00]/30 transition-colors flex items-center justify-between">
-                    <div>
-                      <p className="text-[9px] font-black text-[#ff6a00] uppercase tracking-[0.3em] mb-1 opacity-60">Passcode</p>
-                      <p className="text-xl font-black text-white font-mono tracking-widest">{livePasscode || '---'}</p>
+                  ) : (
+                    <div className="flex items-center gap-3 py-4">
+                      <Clock className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                      <p className="text-gray-500 font-bold text-sm">Room ID &amp; Pass will be shared <span className="text-white font-black">10 minutes before</span> match start.</p>
                     </div>
-                    {livePasscode && (
-                      <button onClick={() => copyToClipboard(livePasscode)} className="bg-black/30 hover:bg-black/50 p-2 rounded-lg text-gray-400 hover:text-white transition-colors">Copy</button>
-                    )}
-                  </div>
+                  )}
                 </div>
-                {(!liveRoomID || !livePasscode) && (
-                  <div className="mt-4 bg-white/[0.02] border border-dashed border-white/10 rounded-2xl p-6 text-center">
-                     <h4 className="text-gray-500 font-black text-[10px] uppercase tracking-[0.3em] italic">Credentials are hidden until 10 minutes before the match start</h4>
-                  </div>
-                )}
               </div>
             </section>
+            )}
 
             {/* STANDINGS */}
             {data.group?.isResultPublished && data.leaderboard.length > 0 && (
@@ -324,8 +343,8 @@ export default function DashboardPage() {
                           <th className="px-6 py-4">#</th>
                           <th className="px-6 py-4">Squad Hub</th>
                           <th className="px-6 py-4 text-center text-[#ff6a00]">Points</th>
+                          <th className="px-6 py-4 text-center">🏆</th>
                           <th className="px-6 py-4 text-center">K</th>
-                          <th className="px-6 py-4 text-center">M</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
@@ -348,8 +367,10 @@ export default function DashboardPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 text-center font-black text-white">{entry.totalPoints}</td>
+                            <td className="px-6 py-4 text-center font-black text-amber-400 text-[11px]">
+                              {(entry as any).booyahs > 0 ? `${(entry as any).booyahs}` : <span className="text-gray-700">—</span>}
+                            </td>
                             <td className="px-6 py-4 text-center text-gray-500 font-mono">{entry.kills}</td>
-                            <td className="px-6 py-4 text-center text-gray-600">{entry.matchesPlayed}</td>
                           </tr>
                         ))}
                       </tbody>

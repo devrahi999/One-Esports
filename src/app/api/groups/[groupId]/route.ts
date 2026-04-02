@@ -37,8 +37,12 @@ export async function GET(
       .get();
     const matches = matchesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-    // Build leaderboard from submitted results
-    const teamPointsMap: Record<string, { teamId: string; teamName: string; totalPoints: number; kills: number; matchesPlayed: number }> = {};
+    // Build leaderboard from submitted results (with tiebreaker fields)
+    const teamPointsMap: Record<string, {
+      teamId: string; teamName: string;
+      totalPoints: number; placementPoints: number;
+      kills: number; booyahs: number; matchesPlayed: number;
+    }> = {};
 
     for (const match of matches) {
       const m = match as any;
@@ -50,18 +54,33 @@ export async function GET(
             teamId: result.teamId,
             teamName: team?.teamName || result.teamId,
             totalPoints: 0,
+            placementPoints: 0,
             kills: 0,
+            booyahs: 0,
             matchesPlayed: 0,
           };
         }
-        teamPointsMap[result.teamId].totalPoints += result.totalPoints || 0;
-        teamPointsMap[result.teamId].kills += result.kills || 0;
-        teamPointsMap[result.teamId].matchesPlayed += 1;
+        const entry = teamPointsMap[result.teamId];
+        entry.totalPoints += result.totalPoints || 0;
+        entry.kills += result.kills || 0;
+        // Placement points = totalPoints - kills
+        const killPts = result.kills || 0;
+        const placePts = (result.totalPoints || 0) - killPts;
+        entry.placementPoints += placePts;
+        // Count booyahs (1st place finishes)
+        if (result.position === 1) entry.booyahs += 1;
+        entry.matchesPlayed += 1;
       }
     }
 
+    // Sort with full tiebreaker: total pts → booyahs → kills → placement pts
     const leaderboard = Object.values(teamPointsMap)
-      .sort((a, b) => b.totalPoints - a.totalPoints || b.kills - a.kills)
+      .sort((a, b) => {
+        if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+        if (b.booyahs !== a.booyahs) return b.booyahs - a.booyahs;
+        if (b.kills !== a.kills) return b.kills - a.kills;
+        return b.placementPoints - a.placementPoints;
+      })
       .map((entry, idx) => ({
         ...entry,
         qualified: idx < (group.qualifyCount || 0),

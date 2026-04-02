@@ -10,9 +10,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   // Dynamic tournament details
   const [tourName, setTourName] = useState('');
+  const [tournamentActive, setTournamentActive] = useState<boolean | null>(null);
 
   useEffect(() => {
     fetch('/api/tournament')
@@ -20,9 +21,12 @@ export default function LoginPage() {
       .then((data) => {
         if (data.tournament) {
           setTourName(data.tournament.name);
+          setTournamentActive(true);
+        } else {
+          setTournamentActive(false);
         }
       })
-      .catch(() => {});
+      .catch(() => { setTournamentActive(false); });
   }, []);
 
   async function handleLogin(e: React.FormEvent) {
@@ -112,23 +116,14 @@ export default function LoginPage() {
           align-items: center;
           min-height: 100vh;
           min-height: 100dvh;
-          justify-content: flex-end;
+          justify-content: center;
         }
 
-        /* Top branding */
-        .top-brand {
-          position: absolute;
-          top: 16px;
-          left: 50%;
-          transform: translateX(-50%);
-          text-align: center;
-          width: 100%;
-          z-index: 5;
-        }
+        /* Main logo centered */
         .main-logo-top {
           max-width: 150px;
           display: block;
-          margin: 10px auto 0;
+          margin: 0 auto 16px;
           filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
         }
 
@@ -405,41 +400,55 @@ export default function LoginPage() {
         ))}
 
         <div className="hero">
-          {/* Top Branding - Static Logo */}
-          <div className="top-brand">
-            <img src="/logo.png" alt="Free Fire Logo" className="main-logo-top" />
-          </div>
+          {/* Logo centered */}
+          <img src="/logo.png" alt="Free Fire Logo" className="main-logo-top" />
 
-          {/* Dynamic Tournament Details right above buttons */}
-          {tourName && (
-            <div className="dynamic-tour-info">
-              <h1 className="tour-name">{tourName}</h1>
+          {/* Tournament Status / Actions */}
+          {tournamentActive === null ? (
+            <div style={{ width: '100%', textAlign: 'center', marginTop: '20px' }}>
+              <div className="w-6 h-6 border-2 border-[#ff6a00] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-[10px] text-[#ff6a00] font-black uppercase tracking-[0.2em] animate-pulse">Checking status...</p>
             </div>
+          ) : tournamentActive === false ? (
+            <div style={{ width: '100%', textAlign: 'center', marginTop: '10px' }}>
+              <div className="bg-black/40 border border-white/5 rounded-2xl p-6 backdrop-blur-md">
+                <p className="text-gray-400 font-bold text-sm mb-2">Notice</p>
+                <h2 className="text-xl font-black text-white uppercase tracking-widest text-[#ff6a00]">No Tournaments Running</h2>
+                <p className="text-xs text-gray-500 mt-2">Check back later for upcoming events</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Tournament Name */}
+              {tourName && (
+                <div className="dynamic-tour-info">
+                  <h1 className="tour-name">{tourName}</h1>
+                </div>
+              )}
+
+              {/* Login Button */}
+              <div style={{ width: '100%' }}>
+                <button
+                  id="team-login-btn"
+                  className="btn-login"
+                  onClick={() => setShowModal(true)}
+                >
+                  <span style={{ fontSize: '20px' }}>→</span>
+                  Team Login
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Bottom Buttons */}
-          <div style={{ width: '100%' }}>
-            <button
-              id="team-login-btn"
-              className="btn-login"
-              onClick={() => setShowModal(true)}
+          <div className="footer-text" style={{ position: 'fixed', bottom: '20px', left: 0, right: 0 }}>
+            Developed by{' '}
+            <a
+              href={`https://wa.me/8801336166870?text=${encodeURIComponent('I want this type of tournament management system')}`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <span style={{ fontSize: '20px' }}>→</span>
-              Team Login
-            </button>
-            <button
-              id="find-schedule-btn"
-              className="btn-schedule"
-              onClick={() => setShowModal(true)}
-            >
-              <span style={{ fontSize: '15px' }}>⌕</span>
-              Find My Schedule
-            </button>
-          </div>
-
-          <div className="footer-text">
-            Developed &amp; Maintained by{' '}
-            <a href="/admin/login">ONE ESPORTS</a>
+              Rahi Rahman
+            </a>
           </div>
         </div>
       </div>

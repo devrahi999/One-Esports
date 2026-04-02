@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Trophy, Map, Users, Swords, Key, BarChart3, Trash2,
   UserPlus, ChevronRight, ShieldCheck, LogOut, Zap,
-  ArrowRight, CheckCircle2, Circle, Clock
+  ArrowRight, CheckCircle2, Circle, Clock, Archive
 } from 'lucide-react';
 
 interface RoadmapRound {
@@ -145,6 +145,24 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-[#ff6a00] group-hover:translate-x-1 transition-all" />
+              </Link>
+
+              <Link
+                href="/admin/past-tournaments"
+                className="group relative overflow-hidden flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-2xl p-6 hover:border-amber-500/30 hover:bg-amber-500/[0.03] transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors">
+                    <Archive className="w-6 h-6 text-amber-500" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-white uppercase italic tracking-tighter text-xl">Past Tournaments</h2>
+                    <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-0.5">
+                      View archived tournament history
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
               </Link>
             </div>
 
